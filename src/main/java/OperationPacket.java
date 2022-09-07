@@ -113,7 +113,8 @@ public class OperationPacket extends Packet {
     }
 
     /**
-     * Decodes and returns evaluated value of Operation Packet
+     * Decodes and returns evaluated value of Operation Packet.
+     * First carves sub-packets and then applies desired operation.
      * @return packet evaluated value
      * @throws InvalidPacketTypeException Invalid type of packet exception
      */
