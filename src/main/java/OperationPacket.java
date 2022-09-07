@@ -94,7 +94,7 @@ public class OperationPacket extends Packet {
      * @return evaluated packet
      * @throws InvalidPacketTypeException Invalid type of packet exception
      */
-    private int solveOperation() throws InvalidPacketTypeException {
+    private int solveOperation() throws InvalidPacketTypeException, PacketPayloadHasNoEndException {
 
         int result = subPackets.get(0).decode();
 
@@ -119,7 +119,7 @@ public class OperationPacket extends Packet {
      * @throws InvalidPacketTypeException Invalid type of packet exception
      */
     @Override
-    public int decode() throws InvalidPacketTypeException {
+    public int decode() throws InvalidPacketTypeException, PacketPayloadHasNoEndException {
         PacketDecoder pd = new PacketDecoder();
 
         this.subPackets = pd.carveConsecutivePackets(this.data, this.nrSubPackets);

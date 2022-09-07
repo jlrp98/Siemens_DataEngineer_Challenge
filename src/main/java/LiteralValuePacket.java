@@ -36,7 +36,7 @@ public class LiteralValuePacket extends Packet{
      * @return packet evaluated value
      */
     @Override
-    public int decode() {
+    public int decode() throws PacketPayloadHasNoEndException {
         PacketDecoder pd = new PacketDecoder();
 
         return pd.carvePayload(this);

@@ -51,7 +51,7 @@ abstract class Packet {
      * @return packet evaluated value
      * @throws InvalidPacketTypeException Invalid type of packet exception
      */
-    public abstract int decode() throws InvalidPacketTypeException;
+    public abstract int decode() throws InvalidPacketTypeException, PacketPayloadHasNoEndException;
 
     public int getHEADER_SIZE() {
         return HEADER_SIZE;

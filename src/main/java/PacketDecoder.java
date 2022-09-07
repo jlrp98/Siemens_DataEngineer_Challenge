@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Packet decoding class.
@@ -93,7 +94,7 @@ public class PacketDecoder {
         try {
             Packet packet = binaryToPacket(bin);
             message = packet.decode();
-        } catch (InvalidPacketTypeException e) {
+        } catch (InvalidPacketTypeException | PacketPayloadHasNoEndException e) {
             throw new RuntimeException(e);
         }
 
@@ -134,30 +135,39 @@ public class PacketDecoder {
      * @param packet Literal Value Packet
      * @return carved payload in decimal form
      */
-    public int carvePayload(LiteralValuePacket packet) {
-        StringBuilder payload = new StringBuilder();
+    public int carvePayload(LiteralValuePacket packet) throws PacketPayloadHasNoEndException {
 
-        String payloadBits = packet.getData();
+        String rawPayloadBits = packet.getData();
         //System.out.println("Decoding: "+packet.getFullBinary());
 
-        for(int i = 0; i < payloadBits.length() - NR_BITS_PAYLOAD_GROUP + 1; i+= NR_BITS_PAYLOAD_GROUP) {
+        List<String> groups = new ArrayList<>();
+        int index = 0;
+        boolean isEndOfPacket = false;
 
-            //segment bits into groups by dividing them in groups of PAYLOAD_GROUP_SIZE
-            String group = payloadBits.substring(i,i + NR_BITS_PAYLOAD_GROUP);
+        while(!isEndOfPacket) {
 
-            //"first bit indicates if the current group is the last"
-            boolean isEndOfPacket = group.charAt(0) == '0';
+            //check if valid index
+            if(index > rawPayloadBits.length()) throw new PacketPayloadHasNoEndException();
 
-            //append rest of group data bits to payload
-            payload.append(group.substring(1));
+            //get next group from raw payload
+            String group = rawPayloadBits.substring(index, index + NR_BITS_PAYLOAD_GROUP);
 
+            //check if its last group
+            if(group.charAt(0) == '0') isEndOfPacket = true;
 
-            if(isEndOfPacket) break;
+            //remove first bit - it is not part of the data - and add it to groups list
+            groups.add(group.substring(1));
+
+            //calculate next groups index
+            index += NR_BITS_PAYLOAD_GROUP;
         }
+
+        //concatenate all bits - results in carved payload
+        String payload = String.join("",groups);
 
 
         //System.out.println("Extracted payload: "+payload.toString());
-        return binaryToDecimal(payload.toString());
+        return binaryToDecimal(payload);
     }
 
     /**
