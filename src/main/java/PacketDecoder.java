@@ -8,6 +8,9 @@ import java.util.HashMap;
  */
 public class PacketDecoder {
 
+    /**
+     * Number of bits each payload group occupies
+     */
     private final int NR_BITS_PAYLOAD_GROUP = 5;
     private final int LITERAL_VALUE_PACKET_ID = 4;
     private String hex = "";
@@ -232,12 +235,17 @@ public class PacketDecoder {
     private int findPacketLength(String consecutivePacketsBinary) throws InvalidPacketTypeException {
 
         int length = 0;
+
+        //get next packet. Only the header is relevant here
         Packet nextPacket = binaryToPacket(consecutivePacketsBinary);
 
         if (nextPacket.getPacketTypeId() == LITERAL_VALUE_PACKET_ID) {
+            //if its a literal value packet the length is equals to header_size + data_size
             length = nextPacket.getHEADER_SIZE() + findUncarvedPayloadLength(nextPacket.getData());
         }else {
-            //there may be nested packets
+            //if its an operation packet we need to check for nested packets in all sub-packets
+            //length will be the header_size + what the recursion returns
+
             int nrSubPackets = ((OperationPacket) nextPacket).getNrSubPackets();
             int HEADER_SIZE = nextPacket.getHEADER_SIZE();
 
